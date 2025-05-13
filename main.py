@@ -1,14 +1,9 @@
 # encoding=utf-8
 import requests
 import Util
-username = ""
-password = ""
+from config import *
 baseUrl = "http://xyfw.xujc.com/"
 session = requests.Session()
-login_url = baseUrl + "dfcx/index.php?c=Login&a=login"
-login_data = {"username": username, "password": password}
-session.post(login_url, data=login_data)
-data_url = baseUrl + "dfcx/index.php?c=Dfcx&a=ydjl"
-res = session.get(data_url)
-res_text = res.text
-Util.HTMLparser(res_text)
+session.post(baseUrl + "dfcx/index.php?c=Login&a=login", data={"username": username, "password": password})
+res = session.get(baseUrl + "dfcx/index.php?c=Dfcx&a=ydjl").text
+Util.HTMLparser(res)
