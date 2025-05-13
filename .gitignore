@@ -175,3 +175,9 @@ cython_debug/
 
 
 config.py
+/.idea/inspectionProfiles/profiles_settings.xml
+/.idea/.gitignore
+/.idea/misc.xml
+/.idea/modules.xml
+/.idea/TKKCElecNotify.iml
+/.idea/vcs.xml
