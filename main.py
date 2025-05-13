@@ -1,8 +1,8 @@
 # encoding=utf-8
 import requests
 import Util
-username = "eieu24053"
-password = "-W2CwZ4W"
+username = ""
+password = ""
 baseUrl = "http://xyfw.xujc.com/"
 session = requests.Session()
 login_url = baseUrl + "dfcx/index.php?c=Login&a=login"
