@@ -1,0 +1,12 @@
+### GET request to example server
+POST http://127.0.0.1:8700/api/eLogin
+Content-Type: application/json
+
+{
+  "username": "eieu24053",
+  "password": "_tKk3M@K"
+}
+
+
+
+###

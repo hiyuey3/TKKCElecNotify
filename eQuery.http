@@ -1,0 +1,14 @@
+### GET request to example server
+###
+
+POST http://127.0.0.1:8700/api/eQuery
+Content-Type: application/json
+
+{
+  "username": "eieu24053",
+  "session_id": "e84ab512-5963-4478-b62b-19934cc6a7ac"
+}
+
+###
+
+###
