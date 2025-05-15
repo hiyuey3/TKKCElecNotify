@@ -4,7 +4,7 @@ from bs4 import BeautifulSoup
 import re
 import time
 import pymongo
-
+import push
 class ElecQuery:
     def __init__(self, username, password, base_url, mongo_uri):
 
@@ -17,6 +17,7 @@ class ElecQuery:
         self.client = pymongo.MongoClient(mongo_uri)
         self.db = self.client["elec_db"]
         self.collection = self.db["elec_records"]
+        self.msg = ''
 
     def login(self):
         login_url = f"{self.base_url}dfcx/index.php?c=Login&a=login"
@@ -28,6 +29,7 @@ class ElecQuery:
             return False
         else:
             print("登录成功")
+
             return True
 
     def fetch_data(self):
@@ -48,19 +50,21 @@ class ElecQuery:
             "remaining_power": float(remaining_power),
             "total_power": float(total_power),
         }
-        self.collection.insert_one(data)  # **插入数据**
+        self.collection.insert_one(data)
         print("数据已存入 MongoDB,等等下次执行")
 
     def compare_previous(self, meter_name, current_remaining, total_power):
-        """对比上次记录的剩余电量"""
+
         latest = self.collection.find_one({"meter_name": meter_name}, sort=[("timestamp", pymongo.DESCENDING)])
         if latest:
             last_remaining = latest["remaining_power"]
             change = float(current_remaining) - last_remaining
+            print('电表：', meter_name)
             print(f"上次记录的剩余电量: {last_remaining} 度")
             print(f"电量变化: {change} 度")
+            push.sm('电表：'+meter_name+f"<br />剩余电量: {last_remaining} 度<br />" +f"电量变少: {int(change)} 度")
         else:
-            print("无历史数据，无法对比")
+            print("无历史数据的对比会在下次开始")
 
     def HTMLparser(self, res_text):
         soup = BeautifulSoup(res_text, "html.parser")
@@ -73,6 +77,7 @@ class ElecQuery:
                 meter_name = match.group(1)
                 remaining_power = match.group(2)
                 total_power = match.group(3)
+
                 self.compare_previous(meter_name, remaining_power,total_power)
                 self.store_data(meter_name, remaining_power,total_power)
                 print("-" * 40)
