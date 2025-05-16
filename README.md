@@ -5,3 +5,4 @@
 1. pip install -r requirement.txt
 2. python main.py
 
+后端数据库使用MongoDB 记录余电变化
