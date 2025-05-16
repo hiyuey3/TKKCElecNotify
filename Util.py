@@ -4,7 +4,7 @@ from bs4 import BeautifulSoup
 import re
 import time
 import pymongo
-import push
+import Push
 class ElecQuery:
     def __init__(self, username, password, base_url, mongo_uri):
 
@@ -62,7 +62,7 @@ class ElecQuery:
             print('电表：', meter_name)
             print(f"上次记录的剩余电量: {last_remaining} 度")
             print(f"电量变化: {change} 度")
-            push.sm('电表：'+meter_name+f"<br />剩余电量: {last_remaining} 度<br />" +f"电量变少: {int(change)} 度")
+            Push.sendMsg('电表：'+meter_name+f"<br />剩余电量: {last_remaining} 度<br />" +f"电量变少: {int(change)} 度")
         else:
             print("无历史数据的对比会在下次开始")
 
