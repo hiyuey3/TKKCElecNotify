@@ -1,8 +1,6 @@
 # encoding=utf-8
 import Util
 from config import *
-
-
 if __name__ == "__main__":
     print("-" * 40)
     print('电费查询')
