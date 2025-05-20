@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify,Blueprint
 import eUtil
 
 app = Flask(__name__)
@@ -47,6 +47,10 @@ def api_query():
 
     return jsonify({"status": "success", "data": docs}) if docs else jsonify(
         {"status": "error", "message": "无记录"}), 404
+
+
+
+
 
 
 if __name__ == '__main__':
