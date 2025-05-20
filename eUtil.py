@@ -17,12 +17,12 @@ SESSION_TIMEOUT = 15 * 60
 def GenTimeStamp():
     return int(time.time())
 
-def generate_session_id():
+def eGenSession_id():
     return str(uuid.uuid4())
 
-def store_session(username, session_cookie, password, session_id=None):
+def eSaveSession(username, session_cookie, password, session_id=None):
     if not session_id:
-        session_id = generate_session_id()
+        session_id = eGenSession_id()
     sessions.update_one(
         {"username": username},
         {"$set": {
@@ -34,27 +34,27 @@ def store_session(username, session_cookie, password, session_id=None):
         upsert=True
     )
 
-def get_session(username):
+def eGetSession(username):
     user_data = sessions.find_one({"username": username})
     if user_data:
         current_time = GenTimeStamp()
         session_time = user_data.get("timestamp", 0)
         if current_time - session_time > SESSION_TIMEOUT:
-            new_session = login(username, user_data.get("password"))
-            new_session_id = generate_session_id()
+            new_session = eLogin(username, user_data.get("password"))
+            new_session_id = eGenSession_id()
             if new_session:
-                store_session(username, new_session, user_data.get("password"), new_session_id)
+                eSaveSession(username, new_session, user_data.get("password"), new_session_id)
                 return {"session": new_session, "session_id": new_session_id}
             else:
                 return None
         sid = user_data.get("session_id")
         if not sid:
-            sid = generate_session_id()
+            sid = eGenSession_id()
             sessions.update_one({"username": username}, {"$set": {"session_id": sid}})
         return {"session": user_data.get("session"), "session_id": sid}
     return None
 
-def login(username, password):
+def eLogin(username, password):
     if not password:
         return None
     s = requests.Session()
@@ -64,8 +64,8 @@ def login(username, password):
     )
     return None if "登录失败" in response.text else s.cookies.get_dict()
 
-def fetch_data(username):
-    session_data = get_session(username)
+def eFetchData(username):
+    session_data = eGetSession(username)
     if session_data and session_data.get("session"):
         url = f"{baseUrl}dfcx/index.php?c=Dfcx&a=ydjl"
         return requests.get(url, cookies=session_data["session"]).text
