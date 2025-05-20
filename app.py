@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify,Blueprint
 import eUtil
 import hashlib
 app = Flask(__name__)
@@ -70,6 +70,10 @@ def wc_check():
 
     return jsonify({"status": "error", "message": "无效请求"}), 405
     data = request.json
+
+
+
+
 
 
 
