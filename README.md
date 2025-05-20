@@ -5,3 +5,7 @@
 1. pip install -r requirement.txt
 2. python main.py
 
+后端数据库使用MongoDB 记录余电变化
+
+这是只是一项课程的结课设计，它不应该用于任何商业项目中。
+111
