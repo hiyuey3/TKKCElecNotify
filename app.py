@@ -1,8 +1,9 @@
 from flask import Flask, request, jsonify
 import eUtil
-
+import hashlib
 app = Flask(__name__)
-
+# WECHAT_TOKEN = os.getenv("WECHAT_TOKEN", "your_wechat_token")  # 请替换成你的微信 Token
+WECHAT_TOKEN='api.5i03.cn'
 
 @app.route('/api/eLogin', methods=['POST'])
 def api_login():
@@ -48,6 +49,29 @@ def api_query():
     return jsonify({"status": "success", "data": docs}) if docs else jsonify(
         {"status": "error", "message": "无记录"}), 404
 
+@app.route('/api/WC_Check',methods=['GET'])
+def wc_check():
+    if request.method == "GET":
+        signature = request.args.get("signature")
+        timestamp = request.args.get("timestamp")
+        nonce = request.args.get("nonce")
+        echostr = request.args.get("echostr")
+
+        if not all([signature, timestamp, nonce, echostr]):
+            return jsonify({"status": "error", "message": "缺少参数"}), 400
+
+        token_list = sorted([WECHAT_TOKEN, timestamp, nonce])
+        hashcode = hashlib.sha1("".join(token_list).encode()).hexdigest()
+
+        if hashcode == signature:
+            return echostr  # 返回 `echostr` 让微信服务器确认
+        else:
+            return jsonify({"status": "error", "message": "签名校验失败"}), 403
+
+    return jsonify({"status": "error", "message": "无效请求"}), 405
+    data = request.json
+
+
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=8700, debug=True)
+    app.run(host='0.0.0.0', port=80, debug=True)

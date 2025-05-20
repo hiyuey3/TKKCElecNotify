@@ -4,6 +4,16 @@ import requests
 import pymongo
 import re
 from bs4 import BeautifulSoup
+USER_AGENT='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+headers = {
+    'User-Agent': USER_AGENT
+}
+
+post_headers = {
+    'User-Agent': USER_AGENT,
+    'Content-Type': "application/x-www-form-urlencoded"
+}
+
 
 mongo_uri = "mongodb://localhost:27017"
 client = pymongo.MongoClient(mongo_uri)
