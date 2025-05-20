@@ -181,3 +181,7 @@ config.py
 /.idea/modules.xml
 /.idea/TKKCElecNotify.iml
 /.idea/vcs.xml
+
+
+
+#*.http
