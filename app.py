@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify,Blueprint
+from flask import Flask, request, jsonify,Blueprint,redirect
 import eUtil
 import hashlib
 import requests
@@ -9,8 +9,10 @@ mdb_session = main_db["sessions"]
 mdb_records = main_db["records"]
 app = Flask(__name__)
 # WECHAT_TOKEN = os.getenv("WECHAT_TOKEN", "your_wechat_token")  # 请替换成你的微信 Token
-
-
+WECHAT_APP_ID = ""
+WECHAT_APP_SECERT = ""
+WECHAT_TOKEN = 'api5i03cntoken'
+WECHAT_REDIRECT_URI = 'http://api2.5i03.cn/WeiXin/auth'
 @app.route('/api/eLogin', methods=['POST'])
 def api_login():
     data = request.json
@@ -77,25 +79,54 @@ def wc_check():
     return jsonify({"status": "error", "message": "无效请求"}), 405
     data = request.json
 
+# @app.route("/WeiXin",methods=['GET'])
+# def wc_login():
+#     code=request.args.get('code')
+#     if not code:
+#         return jsonify({"status": "error", "message": "<UNK>"}), 400
+#     else:
+#         wc_auth_s2=requests.post("https://api.weixin.qq.com/sns/oauth2/access_token?appid="+appid+"&secret="+appsecert+"&code="+code+"&grant_type=authorization_code").text
+#         return wc_auth_s2
+#         # mdb_session.insert_one(wc_auth_s2,upsert=True)
+#             # save_openid=mdb_session.update_one("")
+#
+#         # return jsonify({"status": "success", "code": code}),200
 
 
+@app.route('/WeiXin')
+def index():
+    return '<a href="/WeiXin/login">Login with WeChat</a>'
 
-@app.route("/WeiXin",methods=['GET'])
-def wc_login():
-    code=request.args.get('code')
+
+@app.route('/WeiXin/login')
+def login():
+
+    wechat_url = f'https://open.weixin.qq.com/connect/oauth2/authorize?appid={WECHAT_APP_ID}&redirect_uri={WECHAT_REDIRECT_URI}&response_type=code&scope=snsapi_userinfo&state=STATE#wechat_redirect'
+    return redirect(wechat_url)
+
+
+@app.route('/WeiXin/auth')
+def auth():
+    # 用户同意授权后，获取 code
+    code = request.args.get('code')
     if not code:
-        return jsonify({"status": "error", "message": "<UNK>"}), 400
-    else:
-        wc_auth_s2=requests.post("https://api.weixin.qq.com/sns/oauth2/access_token?appid="+appid+"&secret="+appsecert+"&code="+code+"&grant_type=authorization_code").text
-        # mdb_session.insert_one(wc_auth_s2,upsert=True)
-            # save_openid=mdb_session.update_one("")
-
-        # return jsonify({"status": "success", "code": code}),200
+        return 'Authorization Failed.'
+    # 使用 code 换取 access_token 和 openid
+    token_url = f'https://api.weixin.qq.com/sns/oauth2/access_token?appid={WECHAT_APP_ID}&secret={WECHAT_APP_SECERT}&code={code}&grant_type=authorization_code'
+    response = requests.get(token_url)
+    data = response.json()
+    access_token = data.get('access_token')
+    openid = data.get('openid')
+    if access_token and openid:
+        user_info_url = f'https://api.weixin.qq.com/sns/userinfo?access_token={access_token}&openid={openid}&lang=zh_CN'
+        user_response = requests.get(user_info_url)
+        user_data = user_response.json()
+        # 在这里，你可以将用户信息保存到数据库，并设置 session
+        # session['user_info'] = user_data
+        return f'Welcome, {user_data.get("nickname")}!'
+    return 'Failed to fetch user info.'
 
 
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=80, debug=True)
-    appid=""
-    appsecert=""
-    WECHAT_TOKEN = 'api.5i03.cn'
