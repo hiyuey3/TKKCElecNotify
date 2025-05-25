@@ -1,18 +1,23 @@
-from flask import Flask, request, jsonify,Blueprint,redirect
+# encoding=utf-8
+from flask import Flask, request, jsonify, Blueprint, redirect, render_template
 import eUtil
 import hashlib
 import requests
 import pymongo
+import flask
+
 client = pymongo.MongoClient("mongodb://localhost:27017")
 main_db = client["main_db"]
 mdb_session = main_db["sessions"]
 mdb_records = main_db["records"]
 app = Flask(__name__)
 # WECHAT_TOKEN = os.getenv("WECHAT_TOKEN", "your_wechat_token")  # 请替换成你的微信 Token
-WECHAT_APP_ID = ""
-WECHAT_APP_SECERT = ""
-WECHAT_TOKEN = 'api5i03cntoken'
+WECHAT_APP_ID = "wx2923721f21fef02d"
+WECHAT_APP_SECRET = "0260b34707815bed26e753af552b7644"
+WECHAT_TOKEN = 'token_sasosnoibjkdbhc'
 WECHAT_REDIRECT_URI = 'http://api2.5i03.cn/WeiXin/auth'
+
+
 @app.route('/api/eLogin', methods=['POST'])
 def api_login():
     data = request.json
@@ -35,7 +40,7 @@ def api_login():
     })
 
 
-@app.route('/api/eQuery', methods=['POST','GET'])
+@app.route('/api/eQuery', methods=['POST', 'GET'])
 def api_query():
     data = request.json
     username = data.get("username")
@@ -57,7 +62,8 @@ def api_query():
     return jsonify({"status": "success", "data": docs}) if docs else jsonify(
         {"status": "error", "message": "无记录"}), 404
 
-@app.route('/WeiXin/Check',methods=['GET'])
+
+@app.route('/Check', methods=['GET'])
 def wc_check():
     if request.method == "GET":
         signature = request.args.get("signature")
@@ -77,7 +83,8 @@ def wc_check():
             return jsonify({"status": "error", "message": "签名校验失败"}), 403
 
     return jsonify({"status": "error", "message": "无效请求"}), 405
-    data = request.json
+    # data = request.json
+
 
 # @app.route("/WeiXin",methods=['GET'])
 # def wc_login():
@@ -92,6 +99,10 @@ def wc_check():
 #
 #         # return jsonify({"status": "success", "code": code}),200
 
+@app.route('/about')
+def about_me():
+    return render_template('about.html')
+
 
 @app.route('/WeiXin')
 def index():
@@ -100,19 +111,16 @@ def index():
 
 @app.route('/WeiXin/login')
 def login():
-
     wechat_url = f'https://open.weixin.qq.com/connect/oauth2/authorize?appid={WECHAT_APP_ID}&redirect_uri={WECHAT_REDIRECT_URI}&response_type=code&scope=snsapi_userinfo&state=STATE#wechat_redirect'
     return redirect(wechat_url)
 
 
 @app.route('/WeiXin/auth')
 def auth():
-    # 用户同意授权后，获取 code
     code = request.args.get('code')
     if not code:
         return 'Authorization Failed.'
-    # 使用 code 换取 access_token 和 openid
-    token_url = f'https://api.weixin.qq.com/sns/oauth2/access_token?appid={WECHAT_APP_ID}&secret={WECHAT_APP_SECERT}&code={code}&grant_type=authorization_code'
+    token_url = f'https://api.weixin.qq.com/sns/oauth2/access_token?appid={WECHAT_APP_ID}&secret={WECHAT_APP_SECRET}&code={code}&grant_type=authorization_code'
     response = requests.get(token_url)
     data = response.json()
     access_token = data.get('access_token')
@@ -120,12 +128,15 @@ def auth():
     if access_token and openid:
         user_info_url = f'https://api.weixin.qq.com/sns/userinfo?access_token={access_token}&openid={openid}&lang=zh_CN'
         user_response = requests.get(user_info_url)
+        # enc_doc_response= user_response.encode('iso-8859-1').decode('utf8')
         user_data = user_response.json()
         # 在这里，你可以将用户信息保存到数据库，并设置 session
         # session['user_info'] = user_data
-        return f'Welcome, {user_data.get("nickname")}!'
+        # nickname_1=user_data.get("nickname")
+        return (f'<img src="{user_data.get("headimgurl")}"></img><br /> Welcome, {user_data.get("nickname").encode("iso-8859-1").decode("utf8")}!<br /><br />{user_data.get("openid")}'
+                f'<br />请在下方绑定你的学校账号密码<br />'
+                )
     return 'Failed to fetch user info.'
-
 
 
 if __name__ == '__main__':
