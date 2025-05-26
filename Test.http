@@ -1,0 +1,24 @@
+## New in HTTP Client
+
+POST http://127.0.0.1:5000/api/eLogin
+Content-Type: application/json
+
+{
+  "username": "eieu24053",
+  "password": "_tKk3M@K"
+}
+
+###
+
+POST http://127.0.0.1:5000/api/eQuery
+Content-Type: application/json
+
+{
+  "username": "eieu24053",
+  "e_session_id": "927c6d37-a4d2-42e8-9d53-75deada4ae23"
+}
+
+###
+
+
+

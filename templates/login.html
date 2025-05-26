@@ -4,124 +4,27 @@
     <meta charset="UTF-8">
     <meta content="width=device-width, initial-scale=1" name="viewport">
     <title>登录</title>
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            const loginForm = document.getElementById("login-form");
-            const usernameField = document.getElementById("username");
-            const passwordField = document.getElementById("password");
-            const rememberMeCheckbox = document.getElementById("remember-me");
-            const loginMessage = document.getElementById("login-message");
-            const cancelButton = document.getElementById("cancel-auto-login");
-
-            if (!loginForm || !usernameField || !passwordField || !rememberMeCheckbox || !loginMessage || !cancelButton) {
-                console.error("未找到某些表单元素，请检查 HTML 代码是否正确！");
-                return;
-            }
-
-            let autoLoginTimeout = null;
-
-            if (localStorage.getItem("rememberMe") === "true") {
-                usernameField.value = localStorage.getItem("username") || "";
-                passwordField.value = localStorage.getItem("password") || "";
-                rememberMeCheckbox.checked = true;
-
-                loginMessage.style.display = "block";
-
-                autoLoginTimeout = setTimeout(() => {
-                    console.log("自动登录执行...");
-                    loginForm.submit();
-                }, 1800);
-
-                console.log("自动登录定时器 ID:", autoLoginTimeout);
-            }
-
-            cancelButton.addEventListener("click", function () {
-                if (autoLoginTimeout) {
-                    clearTimeout(autoLoginTimeout);
-                    autoLoginTimeout = null;
-                    console.log("取消自动登录！");
-                }
-                loginMessage.style.display = "none";
-            });
-
-            loginForm.addEventListener("submit", function () {
-                if (rememberMeCheckbox.checked) {
-                    localStorage.setItem("username", usernameField.value);
-                    localStorage.setItem("password", passwordField.value);
-                    localStorage.setItem("rememberMe", "true");
-                } else {
-                    localStorage.removeItem("username");
-                    localStorage.removeItem("password");
-                    localStorage.setItem("rememberMe", "false");
-                }
-            });
-        });
-
-    </script>
-    <style>
-        body {
-            text-align: center;
-            font-family: Arial, sans-serif;
-        }
-
-        .login-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 20px;
-        }
-
-        .form-container {
-            background: #f8f9fa;
-            padding: 20px;
-            border-radius: 5px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            width: 300px;
-            text-align: left;
-        }
-
-        .li_box, .li_button {
-            display: block;
-            width: 100%;
-            margin: 10px 0;
-            padding: 10px 5px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-        }
-
-        /*.login-options {*/
-        /*    margin-top: 20px;*/
-        /*}*/
-
-        .login-options a {
-            display: inline-block;
-            font-size: 14px;
-            padding: 5px 10px;
-            margin: 5px;
-            text-decoration: none;
-            color: white;
-            border-radius: 5px;
-        }
-
-        .qq {
-            background: #007bff;
-        }
-
-        .wechat {
-            background: #28a745;
-        }
-    </style>
+    <!--    加载对象存储中存储的前端功能Javascript脚本-->
+<!--    <script src="http://fz.cdn.xunyingwl.com/js/3tkkc.js"></script>-->
+<!--    link-->
+<!--    <audio src=""></audio>-->
+    <!--    加载远程服务器层叠样式表-->
+    <link rel="stylesheet" href="http://fz.cdn.xunyingwl.com/css/3tkkc.css"/>
+<!--    3TKK是 一个theTKK的类似物，更加轻量并增加了一些例如上课提醒座位预约等额外功能-->
+    <!--如果用户使能展示我的自豪功能将自动播放厦门大学校歌-->
+    <iframe frameborder="no" border="0" marginwidth="0" marginheight="0" width=0 height=0 src="//music.163.com/outchain/player?type=2&id=35437195&auto=1&height=0"></iframe>
 </head>
 <body>
+
 <div class="login-container">
     <div class="form-container">
         <h2>使用 教务平台 账号登录<br/> 3TKK平台</h2>
-
-        <form action="/login?way=jw" method="post" id="login-form">
+        <form action="/?way=jw" method="post" id="login-form">
+<!--        <form action="/login?way=jw" method="post" id="login-form">-->
             <input id="username" name="username" placeholder="用户名" required type="text" class="li_box">
             <input id="password" name="password" placeholder="密码" required type="password" class="li_box">
             <label>
-                <input id="remember-me" type="checkbox"> 请记住我，并使能自动登录
+                <input id="remember-me" type="checkbox"> 请记住我
             </label>
             <button type="submit" class="li_button">登录</button>
 
@@ -145,6 +48,7 @@
             </span>
         <br/>
         无需担心因数据已经加密</p>
+        勾选记住我将使能自动登录
 </div>
 
 </body>
@@ -152,7 +56,7 @@
     <br/>
     <a href="https://beian.miit.gov.cn/">闽ICP备2021006383号</a>
     <br/>
-    <span>&copy;By <a href="www.xunyingwl.com">找小影</a> 2025 </span>
+    <span>&copy;By <a href="www.xunyingwl.com">小影</a> 2025 </span>
 
 </footer>
 </html>
