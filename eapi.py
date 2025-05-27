@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify
 import eUtil
 
-api_bp = Blueprint('api', __name__)
+api_bp = Blueprint('api' , __name__,url_prefix="/api/elec")
 
 @api_bp.route('/eLogin', methods=['POST'])
 def api_login():
