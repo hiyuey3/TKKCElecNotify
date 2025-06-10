@@ -14,7 +14,7 @@ post_headers = {
     'Content-Type': "application/x-www-form-urlencoded"
 }
 
-
+api=("http://api.余越.我爱你")
 # mongo_uri = "mongodb://localhost:27017"
 client = pymongo.MongoClient("mongodb://localhost:27017")
 main_db = client["main_db"]

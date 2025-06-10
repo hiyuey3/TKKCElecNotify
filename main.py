@@ -4,6 +4,6 @@ from config import *
 if __name__ == "__main__":
     print("-" * 40)
     print('电费查询')
-    eq = Util.ElecQuery(username, password, baseUrl,mongo_uri)
+    eq = Util.ElecQuery(username, password, baseUrl,sqlite_db)
     if eq.login():
         eq.fetch_data()
