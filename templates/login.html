@@ -3,30 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta content="width=device-width, initial-scale=1" name="viewport">
+
     <title>登录</title>
     <!--    加载对象存储中存储的前端功能Javascript脚本-->
-<!--    <script src="http://fz.cdn.xunyingwl.com/js/3tkkc.js"></script>-->
-<!--    link-->
-<!--    <audio src=""></audio>-->
+    <script src="http://fz.cdn.xunyingwl.com/js/3tkkc.js"></script>
+    <!--    <audio src=""></audio>-->
     <!--    加载远程服务器层叠样式表-->
-    <link rel="stylesheet" href="http://fz.cdn.xunyingwl.com/css/3tkkc.css"/>
-<!--    3TKK是 一个theTKK的类似物，更加轻量并增加了一些例如上课提醒座位预约等额外功能-->
+    <link href="http://fz.cdn.xunyingwl.com/css/3tkkc.css" rel="stylesheet"/>
+    <!--    3TKK是 一个theTKK的类似物，更加轻量并增加了一些例如上课提醒座位预约等额外功能-->
     <!--如果用户使能展示我的自豪功能将自动播放厦门大学校歌-->
-    <iframe frameborder="no" border="0" marginwidth="0" marginheight="0" width=0 height=0 src="//music.163.com/outchain/player?type=2&id=35437195&auto=1&height=0"></iframe>
+    <!--    <iframe frameborder="no" border="0" marginwidth="0" marginheight="0" width=0 height=0 src="//music.163.com/outchain/player?type=2&id=35437195&auto=1&height=0"></iframe>-->
 </head>
 <body>
 
 <div class="login-container">
     <div class="form-container">
         <h2>使用 教务平台 账号登录<br/> 3TKK平台</h2>
-        <form action="/?way=jw" method="post" id="login-form">
-<!--        <form action="/login?way=jw" method="post" id="login-form">-->
-            <input id="username" name="username" placeholder="用户名" required type="text" class="li_box">
-            <input id="password" name="password" placeholder="密码" required type="password" class="li_box">
+        <form action="/?way=jw" id="login-form" method="post">
+            <!--        <form action="/login?way=jw" method="post" id="login-form">-->
+            <input class="li_box" id="username" name="username" placeholder="用户名" required type="text">
+            <input class="li_box" id="password" name="password" placeholder="密码" required type="password">
             <label>
                 <input id="remember-me" type="checkbox"> 请记住我
             </label>
-            <button type="submit" class="li_button">登录</button>
+            <button class="li_button" type="submit">登录</button>
 
         </form>
     </div>
@@ -48,7 +48,7 @@
             </span>
         <br/>
         无需担心因数据已经加密</p>
-        勾选记住我将使能自动登录
+    勾选记住我将使能自动登录
 </div>
 
 </body>

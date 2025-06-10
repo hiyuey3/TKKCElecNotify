@@ -1,9 +1,9 @@
 from flask import Blueprint, request, jsonify
 import eUtil
 
-api_bp = Blueprint('api', __name__)
+eapi_bp = Blueprint('eapi' , __name__,url_prefix="/api/e")
 
-@api_bp.route('/eLogin', methods=['POST'])
+@eapi_bp.route('/login', methods=['POST'])
 def api_login():
     data = request.json
     username = data.get("username")
@@ -26,7 +26,7 @@ def api_login():
     })
 
 
-@api_bp.route('/eQuery', methods=['POST', 'GET'])
+@eapi_bp.route('/eQuery', methods=['POST', 'GET'])
 def api_query():
     data = request.json
     username = data.get("username")
