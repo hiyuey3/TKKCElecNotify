@@ -10,16 +10,11 @@ password='_tKk3M@K'
 class xyfwApi:
     def __init__(self):
         self.baseUrl = baseUrl
-        self.headers = {
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3"
-        }
+        self.headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3"}
         self.session = requests.Session()
     def login(self, username, password):
         loginUrl = self.baseUrl + "dfcx/index.php?c=Login&a=login"
-        data = {
-            "username": username,
-            "password": password
-        }
+        data = {"username": username,"password": password}
         response = self.session.post(loginUrl, headers=self.headers, data=data)
         if response.status_code == 200:
             return response.text
