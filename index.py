@@ -3,7 +3,7 @@ import sys
 sys.stdout.reconfigure(encoding='utf-8')
 from datetime import timedelta,datetime
 endDate= (datetime.now()- timedelta(days=1)).strftime("%Y-%m-%d")
-startDate = (endDate - timedelta(days=30)).strftime("%Y-%m-%d")
+startDate = (datetime.now() - timedelta(days=31)).strftime("%Y-%m-%d")
 baseUrl="http://xyfw.xujc.com/"
 username='eieu24053'
 password='_tKk3M@K'
@@ -18,6 +18,7 @@ class xyfwApi:
         response = self.session.post(loginUrl, headers=self.headers, data=data)
         if response.status_code == 200:
             return response.text
+
         else:
             return False
     #dfcx/index.php?c=Dfcx&a=ydjl
