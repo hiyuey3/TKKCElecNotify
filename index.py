@@ -16,10 +16,7 @@ class xyfwApi:
         self.session = requests.Session()
     def login(self, username, password):
         loginUrl = self.baseUrl + "dfcx/index.php?c=Login&a=login"
-        data = {
-            "username": username,
-            "password": password
-        }
+        data = {"username": username,"password": password}
         response = self.session.post(loginUrl, headers=self.headers, data=data)
         if response.status_code == 200:
             return response.text
