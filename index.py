@@ -1,47 +1,119 @@
-import requests
-import sys
+import sys,os,requests,csv
+from requests.utils import dict_from_cookiejar, cookiejar_from_dict
 sys.stdout.reconfigure(encoding='utf-8')
-from datetime import timedelta,datetime
-endDate= (datetime.now()- timedelta(days=1)).strftime("%Y-%m-%d")
-startDate = (datetime.now() - timedelta(days=31)).strftime("%Y-%m-%d")
-baseUrl="http://xyfw.xujc.com/"
-username='eieu24053'
-password='_tKk3M@K'
-class xyfwApi:
-    def __init__(self):
-        self.baseUrl = baseUrl
-        self.headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3"}
-        self.session = requests.Session()
-    def login(self, username, password):
-        loginUrl = self.baseUrl + "dfcx/index.php?c=Login&a=login"
-        data = {"username": username,"password": password}
-        response = self.session.post(loginUrl, headers=self.headers, data=data)
-        if response.status_code == 200:
-            return response.text
+from datetime import timedelta, datetime
+EndDate = (datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d")
+StartDate = (datetime.now() - timedelta(days=31)).strftime("%Y-%m-%d")
+BaseUrl = "http://xyfw.xujc.com/"
+Username = 'eieu24053'
+Password = '_tKk3M@K'
+SessionFile = "Session.txt"
+TimeFile = "SessionTime.txt"
 
-        else:
+
+
+class XyfwApi:
+    def __init__(self):
+        self.BaseUrl = BaseUrl
+        self.Headers = {
+            "User-Agent": (
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                "AppleWebKit/537.36 (KHTML, like Gecko) "
+                "Chrome/58.0.3029.110 Safari/537.3"
+            )
+        }
+        self.Session = requests.Session()
+        self.SessionManager = SessionManager(self.Session, SessionFile, TimeFile)
+
+    def Login(self, Username, Password):
+        LoginUrl = self.BaseUrl + "dfcx/index.php?c=Login&a=login"
+        Data = {"username": Username, "password": Password}
+        try:
+            R = self.Session.post(LoginUrl, headers=self.Headers, data=Data)
+            if R.status_code == 200 and "欢迎您" in R.text:
+                self.SessionManager.Save()
+                return True
+            else:
+                return False
+        except:
             return False
-    #dfcx/index.php?c=Dfcx&a=ydjl
-    def fetchElecData(self):
-        elecUrl = self.baseUrl + ("dfcx/index.php?c=Dfcx&a=ydjl&start=" + startDate + "&end=" + endDate+'&')
-        response = self.session.get(elecUrl, headers=self.headers)
-        if response.status_code == 200:
-            return response.text
-            with open("elecData"+endDate+".html", "w", encoding="utf-8") as file:
-                file.write(ElecData)
-        else:
+
+    def FetchElecData(self):
+        ElecUrl = self.BaseUrl + f"dfcx/index.php?c=Dfcx&a=ydjl&start={StartDate}&end={EndDate}"
+        try:
+            R = self.Session.get(ElecUrl, headers=self.Headers)
+            if R.status_code != 200:
+                return None
+
+            with open("ElecData" + EndDate + ".html", "w", encoding="utf-8") as f:
+                f.write(R.text)
+            from bs4 import BeautifulSoup
+            Soup = BeautifulSoup(R.text, 'html.parser')
+            Table = Soup.find('table', {'id': 'data_table'})
+            Rows = Table.find_all('tr')
+
+            Data = []
+            for Tr in Rows:
+                Cols = Tr.find_all(['td', 'th'])
+                Row = [Td.get_text(strip=True) for Td in Cols]
+                if Row:
+                    Data.append(Row)
+
+            with open("ElecData" + EndDate + ".csv", "w", newline='', encoding="utf-8-sig") as f:
+                Writer = csv.writer(f)
+                for Row in Data:
+                    Writer.writerow(Row)
+
+            return R.text
+        except:
             return None
 
+class SessionManager:
+    def __init__(self, Session, SessionFile, TimeFile):
+        self.Session = Session
+        self.SessionFile = SessionFile
+        self.TimeFile = TimeFile
+
+    def Save(self):
+        with open(self.SessionFile, "w+", encoding="utf-8") as f:
+            for cookie in self.Session.cookies:
+                f.write(f"{cookie.name}={cookie.value}\n")
+        with open(self.TimeFile, "w+") as f:
+            f.write(datetime.now().isoformat())
+
+    def Load(self):
+        if os.path.exists(self.SessionFile):
+            with open(self.SessionFile, "r", encoding="utf-8") as f:
+                for line in f:
+                    if "=" in line:
+                        name, value = line.strip().split("=", 1)
+                        self.Session.cookies.set(name, value)
+
+    def Expired(self, MaxHours=3):
+        if not os.path.exists(self.TimeFile):
+            return True
+        with open(self.TimeFile, "r") as f:
+            try:
+                ts = datetime.fromisoformat(f.read())
+                return datetime.now() - ts > timedelta(hours=MaxHours)
+            except:
+                return True
 
 if __name__ == "__main__":
-    xyfw = xyfwApi()
-    if xyfw.login(username, password):
-        print("Login successful!")
-        ElecData = xyfw.fetchElecData()
-        if ElecData:
-            print("Electricity data fetched successfully!")
+    Api = XyfwApi()
 
-        else:
-            print("Failed to fetch electricity data.")
+    if Api.SessionManager.Expired():
+        print("Session expired or missing, logging in...")
+        if not Api.Login(Username, Password):
+            print("Login failed. Check credentials.")
+            sys.exit(1)
+        print("Login successful.")
     else:
-        print("Login failed. Please check your credentials.")
+        print("Using saved session.")
+        Api.SessionManager.Load()
+
+    ElecData = Api.FetchElecData()
+    if ElecData:
+        print("Electricity data fetched.")
+    else:
+        print("Failed to fetch electricity data.")
