@@ -1,7 +1,4 @@
 import sys,os,requests,csv,re
-from requests.utils import dict_from_cookiejar, cookiejar_from_dict
-from tornado.gen import sleep
-
 sys.stdout.reconfigure(encoding='utf-8')
 from datetime import timedelta, datetime
 EndDate = (datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d")
@@ -36,8 +33,8 @@ class XyfwApi:
                 return False
         except:
             return False
-    def Fetch30ElecData(self):
-        ElecUrl = self.BaseUrl + f"dfcx/index.php?c=Dfcx&a=ydjl&start={StartDate}&end={EndDate}"
+    def FetchElecData(self):
+        ElecUrl = self.BaseUrl + f"dfcx/index.php?c=Dfcx&a=ydjl&start={StartDate}&end={EndDate}&page=1"
         try:
             R = self.Session.get(ElecUrl, headers=self.Headers)
             if R.status_code != 200:
@@ -47,9 +44,6 @@ class XyfwApi:
             from bs4 import BeautifulSoup
             Soup = BeautifulSoup(R.text, 'html.parser')
             TdList = Soup.find_all("td", style=lambda s: s and "font-size" in s)
-            CsvFile = "ElecNow"+datetime.now().strftime("%Y-%m-%d")+".csv"
-            NowTime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            NewRows = []
             for Td in TdList:
                 TextData = Td.text.strip()
                 Match = re.search(r"(.+?)：购买剩余电量 (\d+\.\d+) 度，总电量 (\d+\.\d+) 度", TextData)
@@ -57,17 +51,8 @@ class XyfwApi:
                     MeterName = Match.group(1)
                     RemainingPower = Match.group(2)
                     TotalPower = Match.group(3)
-                    NewRows.append([NowTime, MeterName, RemainingPower, TotalPower])
-
-            if NewRows:
-                FileExists = os.path.exists(CsvFile)
-                with open(CsvFile, "a", newline='', encoding="utf-8-sig") as f:
-                    Writer = csv.writer(f)
-                    if not FileExists:
-                        Writer.writerow(["时间", "电表名称", "剩余电量", "总电量"])
-                    for Row in NewRows:
-                        Writer.writerow(Row)
-
+                    Msg=(f"电表：{MeterName}, 剩余电量: {RemainingPower} 度, 总电量: {TotalPower} 度")
+                    print(Msg)
             Table = Soup.find('table', {'id': 'data_table'})
             Rows = Table.find_all('tr')
             Data = []
@@ -112,11 +97,15 @@ class SessionManager:
             except:
                 return True
 
+class DataAnalysis:
+    def __init__(self, DataFile):
+        self.DataFile = DataFile
+        self.Data = []
+        self.LoadData()
 
 
 if __name__ == "__main__":
     Api = XyfwApi()
-
     if Api.SessionManager.Expired():
         print("Session expired or missing, logging in...")
         if not Api.Login(Username, Password):
@@ -126,8 +115,7 @@ if __name__ == "__main__":
     else:
         print("Using saved session.")
         Api.SessionManager.Load()
-
-    ElecData = Api.Fetch30ElecData()
+    ElecData = Api.FetchElecData()
     if ElecData:
         print("Electricity data fetched.")
     else:
