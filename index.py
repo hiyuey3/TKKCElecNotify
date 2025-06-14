@@ -1,5 +1,7 @@
 import sys,os,requests,csv,re
 from requests.utils import dict_from_cookiejar, cookiejar_from_dict
+from tornado.gen import sleep
+
 sys.stdout.reconfigure(encoding='utf-8')
 from datetime import timedelta, datetime
 EndDate = (datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d")
@@ -34,7 +36,7 @@ class XyfwApi:
                 return False
         except:
             return False
-    def FetchElecData(self):
+    def Fetch30ElecData(self):
         ElecUrl = self.BaseUrl + f"dfcx/index.php?c=Dfcx&a=ydjl&start={StartDate}&end={EndDate}"
         try:
             R = self.Session.get(ElecUrl, headers=self.Headers)
@@ -45,7 +47,7 @@ class XyfwApi:
             from bs4 import BeautifulSoup
             Soup = BeautifulSoup(R.text, 'html.parser')
             TdList = Soup.find_all("td", style=lambda s: s and "font-size" in s)
-            CsvFile = "ElecSummary.csv"
+            CsvFile = "ElecNow"+datetime.now().strftime("%Y-%m-%d")+".csv"
             NowTime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             NewRows = []
             for Td in TdList:
@@ -110,6 +112,8 @@ class SessionManager:
             except:
                 return True
 
+
+
 if __name__ == "__main__":
     Api = XyfwApi()
 
@@ -123,7 +127,7 @@ if __name__ == "__main__":
         print("Using saved session.")
         Api.SessionManager.Load()
 
-    ElecData = Api.FetchElecData()
+    ElecData = Api.Fetch30ElecData()
     if ElecData:
         print("Electricity data fetched.")
     else:
