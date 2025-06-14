@@ -1,4 +1,4 @@
-import sys,os,requests,csv
+import sys,os,requests,csv,re
 from requests.utils import dict_from_cookiejar, cookiejar_from_dict
 sys.stdout.reconfigure(encoding='utf-8')
 from datetime import timedelta, datetime
@@ -9,8 +9,6 @@ Username = 'eieu24053'
 Password = '_tKk3M@K'
 SessionFile = "Session.txt"
 TimeFile = "SessionTime.txt"
-
-
 
 class XyfwApi:
     def __init__(self):
@@ -24,7 +22,6 @@ class XyfwApi:
         }
         self.Session = requests.Session()
         self.SessionManager = SessionManager(self.Session, SessionFile, TimeFile)
-
     def Login(self, Username, Password):
         LoginUrl = self.BaseUrl + "dfcx/index.php?c=Login&a=login"
         Data = {"username": Username, "password": Password}
@@ -37,29 +34,47 @@ class XyfwApi:
                 return False
         except:
             return False
-
     def FetchElecData(self):
         ElecUrl = self.BaseUrl + f"dfcx/index.php?c=Dfcx&a=ydjl&start={StartDate}&end={EndDate}"
         try:
             R = self.Session.get(ElecUrl, headers=self.Headers)
             if R.status_code != 200:
                 return None
-
             with open("ElecData" + EndDate + ".html", "w", encoding="utf-8") as f:
                 f.write(R.text)
             from bs4 import BeautifulSoup
             Soup = BeautifulSoup(R.text, 'html.parser')
+            TdList = Soup.find_all("td", style=lambda s: s and "font-size" in s)
+            CsvFile = "ElecSummary.csv"
+            NowTime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            NewRows = []
+            for Td in TdList:
+                TextData = Td.text.strip()
+                Match = re.search(r"(.+?)：购买剩余电量 (\d+\.\d+) 度，总电量 (\d+\.\d+) 度", TextData)
+                if Match:
+                    MeterName = Match.group(1)
+                    RemainingPower = Match.group(2)
+                    TotalPower = Match.group(3)
+                    NewRows.append([NowTime, MeterName, RemainingPower, TotalPower])
+
+            if NewRows:
+                FileExists = os.path.exists(CsvFile)
+                with open(CsvFile, "a", newline='', encoding="utf-8-sig") as f:
+                    Writer = csv.writer(f)
+                    if not FileExists:
+                        Writer.writerow(["时间", "电表名称", "剩余电量", "总电量"])
+                    for Row in NewRows:
+                        Writer.writerow(Row)
+
             Table = Soup.find('table', {'id': 'data_table'})
             Rows = Table.find_all('tr')
-
             Data = []
             for Tr in Rows:
                 Cols = Tr.find_all(['td', 'th'])
                 Row = [Td.get_text(strip=True) for Td in Cols]
                 if Row:
                     Data.append(Row)
-
-            with open("ElecData" + EndDate + ".csv", "w", newline='', encoding="utf-8-sig") as f:
+            with open("ElecData" + EndDate + ".csv", "w+", newline='', encoding="utf-8") as f:
                 Writer = csv.writer(f)
                 for Row in Data:
                     Writer.writerow(Row)
@@ -67,20 +82,17 @@ class XyfwApi:
             return R.text
         except:
             return None
-
 class SessionManager:
     def __init__(self, Session, SessionFile, TimeFile):
         self.Session = Session
         self.SessionFile = SessionFile
         self.TimeFile = TimeFile
-
     def Save(self):
         with open(self.SessionFile, "w+", encoding="utf-8") as f:
             for cookie in self.Session.cookies:
                 f.write(f"{cookie.name}={cookie.value}\n")
         with open(self.TimeFile, "w+") as f:
             f.write(datetime.now().isoformat())
-
     def Load(self):
         if os.path.exists(self.SessionFile):
             with open(self.SessionFile, "r", encoding="utf-8") as f:
@@ -88,7 +100,6 @@ class SessionManager:
                     if "=" in line:
                         name, value = line.strip().split("=", 1)
                         self.Session.cookies.set(name, value)
-
     def Expired(self, MaxHours=3):
         if not os.path.exists(self.TimeFile):
             return True
