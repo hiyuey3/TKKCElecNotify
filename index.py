@@ -33,42 +33,41 @@ class XyfwApi:
                 return False
         except:
             return False
-    def FetchElecData(self):
-        ElecUrl = self.BaseUrl + f"dfcx/index.php?c=Dfcx&a=ydjl&start={StartDate}&end={EndDate}&page=1"
-        try:
-            R = self.Session.get(ElecUrl, headers=self.Headers)
-            if R.status_code != 200:
-                return None
-            with open("ElecData" + EndDate + ".html", "w", encoding="utf-8") as f:
-                f.write(R.text)
-            from bs4 import BeautifulSoup
-            Soup = BeautifulSoup(R.text, 'html.parser')
-            TdList = Soup.find_all("td", style=lambda s: s and "font-size" in s)
-            for Td in TdList:
-                TextData = Td.text.strip()
-                Match = re.search(r"(.+?)：购买剩余电量 (\d+\.\d+) 度，总电量 (\d+\.\d+) 度", TextData)
-                if Match:
-                    MeterName = Match.group(1)
-                    RemainingPower = Match.group(2)
-                    TotalPower = Match.group(3)
-                    Msg=(f"电表：{MeterName}, 剩余电量: {RemainingPower} 度, 总电量: {TotalPower} 度")
-                    print(Msg)
-            Table = Soup.find('table', {'id': 'data_table'})
-            Rows = Table.find_all('tr')
-            Data = []
-            for Tr in Rows:
-                Cols = Tr.find_all(['td', 'th'])
-                Row = [Td.get_text(strip=True) for Td in Cols]
-                if Row:
-                    Data.append(Row)
-            with open("ElecData" + EndDate + ".csv", "w+", newline='', encoding="utf-8") as f:
-                Writer = csv.writer(f)
-                for Row in Data:
-                    Writer.writerow(Row)
 
+    def FetchElecData(self):
+        try:
+            Data = []
+            from bs4 import BeautifulSoup
+            for Page in [1, 2]:
+                ElecUrl = self.BaseUrl + f"dfcx/index.php?c=Dfcx&a=ydjl&start={StartDate}&end={EndDate}&page={Page}"
+                R = self.Session.get(ElecUrl, headers=self.Headers)
+                if R.status_code != 200:
+                    return None
+                with open("ElecData" + EndDate + "_Page" + str(Page) + ".html", "w", encoding="utf-8") as F:
+                    F.write(R.text)
+                Soup = BeautifulSoup(R.text, 'html.parser')
+                for Td in Soup.find_all("td", style=lambda s: s and "font-size" in s):
+                    Match = re.search(r"(.+?)：购买剩余电量 (\d+\.\d+) 度，总电量 (\d+\.\d+) 度", Td.text.strip())
+                    if Match:
+                        MeterName, RemainingPower, TotalPower = Match.groups()
+                        print(f"电表：{MeterName}, 剩余电量: {RemainingPower} 度, 总电量: {TotalPower} 度")
+                Table = Soup.find('table', {'id': 'data_table'})
+                Rows = Table.find_all('tr')
+                for i, Tr in enumerate(Rows):
+                    if Page == 2 and i == 0:
+                        continue
+                    Cols = Tr.find_all(['td', 'th'])
+                    Row = [Td.get_text(strip=True) for Td in Cols]
+                    if Row:
+                        Data.append(Row)
+            with open("ElecData.csv", "w+", newline='', encoding="utf-8") as F:
+                csv.writer(F).writerows(Data)
             return R.text
-        except:
+        except Exception as E:
+            print(f"错误: {E}")
             return None
+
+
 class SessionManager:
     def __init__(self, Session, SessionFile, TimeFile):
         self.Session = Session
