@@ -36,35 +36,42 @@ class XyfwApi:
 
     def FetchElecData(self):
         try:
-            Data = []
             from bs4 import BeautifulSoup
-            for Page in [1, 2]:
-                ElecUrl = self.BaseUrl + f"dfcx/index.php?c=Dfcx&a=ydjl&start={StartDate}&end={EndDate}&page={Page}"
-                R = self.Session.get(ElecUrl, headers=self.Headers)
-                if R.status_code != 200:
-                    return None
-                with open("ElecData" + EndDate + "_Page" + str(Page) + ".html", "w", encoding="utf-8") as F:
-                    F.write(R.text)
-                Soup = BeautifulSoup(R.text, 'html.parser')
-                for Td in Soup.find_all("td", style=lambda s: s and "font-size" in s):
-                    Match = re.search(r"(.+?)：购买剩余电量 (\d+\.\d+) 度，总电量 (\d+\.\d+) 度", Td.text.strip())
-                    if Match:
-                        MeterName, RemainingPower, TotalPower = Match.groups()
-                        print(f"电表：{MeterName}, 剩余电量: {RemainingPower} 度, 总电量: {TotalPower} 度")
-                Table = Soup.find('table', {'id': 'data_table'})
-                Rows = Table.find_all('tr')
-                for i, Tr in enumerate(Rows):
-                    if Page == 2 and i == 0:
+            Data, Now = [], datetime.now()
+            Header, Printed = None, False
+
+            for Offset in range(0, 180, 30):
+                Start = (Now - timedelta(days=Offset + 30)).strftime("%Y-%m-%d")
+                End = (Now - timedelta(days=Offset + 1)).strftime("%Y-%m-%d")
+
+                for Page in [1, 2]:
+                    Url = f"{self.BaseUrl}dfcx/index.php?c=Dfcx&a=ydjl&start={Start}&end={End}&page={Page}"
+                    R = self.Session.get(Url, headers=self.Headers)
+                    if R.status_code != 200:
                         continue
-                    Cols = Tr.find_all(['td', 'th'])
-                    Row = [Td.get_text(strip=True) for Td in Cols]
-                    if Row:
-                        Data.append(Row)
-            with open("ElecData.csv", "w+", newline='', encoding="utf-8") as F:
-                csv.writer(F).writerows(Data)
-            return R.text
-        except Exception as E:
-            print(f"错误: {E}")
+                    Soup = BeautifulSoup(R.text, "html.parser")
+                    if not Printed:
+                        for Td in Soup.find_all("td", style=lambda s: s and "font-size" in s):
+                            M = re.search(r"(.+?)：购买剩余电量 (\d+\.\d+) 度，总电量 (\d+\.\d+) 度", Td.text.strip())
+                            if M:
+                                print(f"电表：{M[1]}, 剩余电量: {M[2]} 度, 总电量: {M[3]} 度")
+                                Printed = True
+                                break
+                    Table = Soup.find("table", {"id": "data_table"})
+                    if not Table:
+                        continue
+                    for Tr in Table.find_all("tr"):
+                        Row = [Td.get_text(strip=True) for Td in Tr.find_all(["td", "th"])]
+                        if Row and (Header is None or Row != Header):
+                            if Header is None:
+                                Header = Row
+                            Data.append(Row)
+            if Data:
+                with open("ElecData.csv", "w", newline='', encoding="utf-8") as f:
+                    csv.writer(f).writerows(Data)
+            return True
+        except Exception as e:
+            print("错误:", e)
             return None
 
 
@@ -96,11 +103,12 @@ class SessionManager:
             except:
                 return True
 
-class DataAnalysis:
-    def __init__(self, DataFile):
-        self.DataFile = DataFile
-        self.Data = []
-        self.LoadData()
+# class DataAnalysis:
+#     def __init__(self, DataFile):
+#         self.DataFile = DataFile
+#         self.Data = []
+#         self.LoadData()
+
 
 
 if __name__ == "__main__":
