@@ -4,8 +4,9 @@ from datetime import timedelta, datetime
 EndDate = (datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d")
 StartDate = (datetime.now() - timedelta(days=31)).strftime("%Y-%m-%d")
 BaseUrl = "http://xyfw.xujc.com/"
-Username = 'eieu24053'
-Password = '_tKk3M@K'
+import config
+Username = config.username
+Password = config.password
 SessionFile = "Session.txt"
 TimeFile = "SessionTime.txt"
 

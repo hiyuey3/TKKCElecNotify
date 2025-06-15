@@ -1,9 +1,9 @@
 import pandas as pd
+import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib
 
-matplotlib.rcParams['font.family'] = 'SimHei'  # 设置字体为黑体
-# matplotlib.rcParams['axes.unicode_minus'] = False
+matplotlib.rcParams['font.family'] = 'SimHei'  # 中文黑体显示
 
 class PowerData:
     def __init__(self, dataFrame):
@@ -14,15 +14,17 @@ class PowerData:
         return self.DataFrame
 
     def FindAnomaly(self):
-        meanVal = self.DataFrame['用量（度/吨）'].mean()
-        stdVal = self.DataFrame['用量（度/吨）'].std()
+        x = self.DataFrame['用量（度/吨）'].values
+        meanVal = np.mean(x)
+        stdVal = np.std(x, ddof=1)
         low = meanVal - 2 * stdVal
         high = meanVal + 2 * stdVal
-        self.DataFrame['IsAnomaly'] = (self.DataFrame['用量（度/吨）'] < low) | (self.DataFrame['用量（度/吨）'] > high)
+        self.DataFrame['IsAnomaly'] = (x < low) | (x > high)
         return self.DataFrame
 
     def CalcDayDiff(self):
-        self.DataFrame['DayDiff'] = self.DataFrame['用量（度/吨）'].diff()
+        x = self.DataFrame['用量（度/吨）'].values
+        self.DataFrame['DayDiff'] = np.insert(np.diff(x), 0, np.nan)
         return self.DataFrame
 
     def AvgByWeekDay(self):
@@ -48,10 +50,10 @@ class PowerData:
         nextPay = payDates.iloc[-1] + pd.Timedelta(days=int(round(avgGap)))
         return list(payDates), nextPay.strftime('%Y-%m-%d')
 
-
     def SaveToCSV(self, fileName='ProcessedPowerData.csv'):
         self.DataFrame.to_csv(fileName, index=False)
         print(f"数据已保存到 {fileName}")
+
 
 class PowerPlot:
     def __init__(self, dataFrame):
@@ -107,7 +109,7 @@ class PowerPlot:
         plt.figure(figsize=(10, 2.5))
         plt.eventplot(payDates, lineoffsets=1, colors='green', label='历史交费')
         if nextPayDate:
-            nextPayDateDt = pd.to_datetime(nextPayDate)  # ← 修复错误
+            nextPayDateDt = pd.to_datetime(nextPayDate)
             plt.eventplot([nextPayDateDt], lineoffsets=1.2, colors='red', label='预测交费')
             plt.text(nextPayDateDt, 1.25, nextPayDate, color='red')
         plt.title('图5 缴费日期预测')
@@ -136,6 +138,5 @@ if __name__ == "__main__":
     if '缴费余额（元）' in df.columns:
         balanceDf = df[['日期', '缴费余额（元）']].dropna()
         payDates, nextPay = analyzer.PredictPayDate(balanceDf)
-        print("历史交费日期：", payDates)
         print("预测下次交费：", nextPay)
         plotter.PlotPayPrediction(payDates, nextPay)
