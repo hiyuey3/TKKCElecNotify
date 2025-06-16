@@ -13,13 +13,7 @@ TimeFile = "SessionTime.txt"
 class XyfwApi:
     def __init__(self):
         self.BaseUrl = BaseUrl
-        self.Headers = {
-            "User-Agent": (
-                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-                "AppleWebKit/537.36 (KHTML, like Gecko) "
-                "Chrome/58.0.3029.110 Safari/537.3"
-            )
-        }
+        self.Headers = {"User-Agent": ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) " "AppleWebKit/537.36 (KHTML, like Gecko) " "Chrome/58.0.3029.110 Safari/537.3")};
         self.Session = requests.Session()
         self.SessionManager = SessionManager(self.Session, SessionFile, TimeFile)
     def Login(self, Username, Password):
@@ -118,7 +112,7 @@ if __name__ == "__main__":
         print("Session expired or missing, logging in...")
         if not Api.Login(Username, Password):
             print("Login failed. Check credentials.")
-            sys.exit(1)
+            # sys.exit(1)
         print("Login successful.")
     else:
         print("Using saved session.")

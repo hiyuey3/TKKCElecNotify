@@ -1,9 +1,8 @@
-import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib
+import pandas as pd;import numpy as np;import matplotlib.pyplot as plt;import matplotlib
 
-matplotlib.rcParams['font.family'] = 'SimHei'  # 中文黑体显示
+
+matplotlib.rcParams['font.family'] = 'Microsoft YaHei'  # 适用于 Windows
+matplotlib.rcParams['font.family'] = 'Arial Unicode MS'  # 适用于 Mac
 
 class PowerData:
     def __init__(self, dataFrame):
@@ -17,8 +16,8 @@ class PowerData:
         x = self.DataFrame['用量（度/吨）'].values
         meanVal = np.mean(x)
         stdVal = np.std(x, ddof=1)
-        low = meanVal - 2 * stdVal
-        high = meanVal + 2 * stdVal
+        low = meanVal - ( 2 * stdVal )
+        high = meanVal + ( 2 * stdVal )
         self.DataFrame['IsAnomaly'] = (x < low) | (x > high)
         return self.DataFrame
 
@@ -50,7 +49,7 @@ class PowerData:
         nextPay = payDates.iloc[-1] + pd.Timedelta(days=int(round(avgGap)))
         return list(payDates), nextPay.strftime('%Y-%m-%d')
 
-    def SaveToCSV(self, fileName='ProcessedPowerData.csv'):
+    def SaveToCSV(self, fileName='ResultElecData.csv'):
         self.DataFrame.to_csv(fileName, index=False)
         print(f"数据已保存到 {fileName}")
 
