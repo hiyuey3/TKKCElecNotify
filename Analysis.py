@@ -1,8 +1,6 @@
-import pandas as pd;import numpy as np;import matplotlib.pyplot as plt;import matplotlib
-
-
-matplotlib.rcParams['font.family'] = 'Microsoft YaHei'  # 适用于 Windows
-matplotlib.rcParams['font.family'] = 'Arial Unicode MS'  # 适用于 Mac
+import pandas as pd;import numpy as np;import matplotlib.pyplot as plt;import matplotlib;
+matplotlib.rcParams['font.family'] = 'Microsoft YaHei'  # Windows
+matplotlib.rcParams['font.family'] = 'Arial Unicode MS'  # Mac
 
 class PowerData:
     def __init__(self, dataFrame):
@@ -119,23 +117,27 @@ class PowerPlot:
         plt.show()
 
 
-if __name__ == "__main__":
-    df = pd.read_csv('ElecData.csv', parse_dates=['日期'])
+# if __name__ == "__main__":
+#     try:
+#         df = pd.read_csv('ElecData.csv', parse_dates=['日期'])
+#
+#         analyzer = PowerData(df)
+#         analyzer.Calc7DayAvg()
+#         analyzer.FindAnomaly()
+#         analyzer.CalcDayDiff()
+#         analyzer.SaveToCSV()
+#
+#         plotter = PowerPlot(analyzer.DataFrame)
+#         plotter.PlotUsageTrend()
+#         plotter.PlotWeekDayPie(analyzer.AvgByWeekDay())
+#         plotter.PlotMonthSum(analyzer.MonthTotal())
+#         plotter.PlotDayDiff()
+#
+#         if '缴费余额（元）' in df.columns:
+#             balanceDf = df[['日期', '缴费余额（元）']].dropna()
+#             payDates, nextPay = analyzer.PredictPayDate(balanceDf)
+#             print("预测下次交费：", nextPay)
+#             plotter.PlotPayPrediction(payDates, nextPay)
+#     except Exception as e:
+#         print("Error:", e)
 
-    analyzer = PowerData(df)
-    analyzer.Calc7DayAvg()
-    analyzer.FindAnomaly()
-    analyzer.CalcDayDiff()
-    analyzer.SaveToCSV()
-
-    plotter = PowerPlot(analyzer.DataFrame)
-    plotter.PlotUsageTrend()
-    plotter.PlotWeekDayPie(analyzer.AvgByWeekDay())
-    plotter.PlotMonthSum(analyzer.MonthTotal())
-    plotter.PlotDayDiff()
-
-    if '缴费余额（元）' in df.columns:
-        balanceDf = df[['日期', '缴费余额（元）']].dropna()
-        payDates, nextPay = analyzer.PredictPayDate(balanceDf)
-        print("预测下次交费：", nextPay)
-        plotter.PlotPayPrediction(payDates, nextPay)
