@@ -11,7 +11,7 @@ def Bark(title: str, message: str, bark_url: str):
         print(f"❌ Bark 推送失败：{r.status_code}")
 
 def SelfWCPush(title: str, message: str, openid: str):
-    message=message+'-' * 12 + ('\n这是自动生成的。\n校方系统实时数据更新时间约为1h，\n日用电数据更新时间为次日。\n'
+    message=message+'-' * 12 + ('\n这是程序自动生成的。\n校方系统实时数据的更新时间约为1h，\n日用电数据的更新时间为次日。\n'
                  "课程设计只供学习和交流使用，请勿滥用。\n"
                  )
     HtmlMessage = message.replace('\n', '<br>')
