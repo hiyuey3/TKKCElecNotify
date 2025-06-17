@@ -185,3 +185,12 @@ config.py
 
 
 #*.http
+/ElecData.csv
+/ResultElecData.csv
+/Session.txt
+/SessionTime.txt
+/图1_用电趋势.png
+/图2_星期平均用电.png
+/图3_月度总用电.png
+/图4_日用电变化.png
+/图5_缴费预测.png
